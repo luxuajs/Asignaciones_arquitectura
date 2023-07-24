@@ -1,0 +1,61 @@
+.data
+    result: .word 0         # Variable para almacenar el resultado
+.text
+    # Función para calcular el término n de Fibonacci
+    # $a0 = n (número de término a calcular)
+    # $v0 = resultado (valor de Fibonacci)
+
+fibonacci:
+    # Manejo de casos base
+    # Si n = 0, retorna 0
+    li $t0, 0
+    beq $a0, $t0, end_fibonacci
+
+    # Si n = 1, retorna 1
+    li $t0, 1
+    beq $a0, $t0, set_one
+
+    # Si n > 1, calcular término de Fibonacci
+    li $t0, 2           # $t0 = 2 (índice del término actual)
+    li $t1, 0           # $t1 = fib(n-2)
+    li $t2, 1           # $t2 = fib(n-1)
+
+fibonacci_loop:
+    add $t3, $t1, $t2   # $t3 = fib(n-2) + fib(n-1)
+    addi $t0, $t0, 1    # Incrementar índice del término actual
+    beq $t0, $a0, end_fibonacci_loop  # Si hemos llegado al término n, terminar
+    move $t1, $t2       # Preparar siguiente iteración (fib(n-2) = fib(n-1))
+    move $t2, $t3       # Preparar siguiente iteración (fib(n-1) = fib(n))
+
+    # Bucle principal para calcular el siguiente término
+    j fibonacci_loop
+
+set_one:
+    li $v0, 1           # $v0 = 1 (retorna 1 como resultado)
+    j end_fibonacci
+
+end_fibonacci_loop:
+    move $v0, $t3       # $v0 = fib(n) (resultado final)
+
+end_fibonacci:
+    jr $ra              # Retornar de la función
+
+# Punto de inicio
+main:
+    # Colocar el valor de n en el registro $a0
+    # Por ejemplo, si quieres calcular el término 10 de Fibonacci, coloca el valor 10 en $a0
+    li $a0, 10
+
+    # Llamar a la función fibonacci
+    jal fibonacci
+
+    # El resultado estará en $v0
+    # Puedes imprimirlo o usarlo para lo que necesites aquí
+    # Por ejemplo, para imprimirlo usando una llamada al sistema:
+    li $v0, 1           # Código de la llamada al sistema para imprimir un entero
+    syscall
+
+    # Terminar el programa
+    li $v0, 10          # Código de la llamada al sistema para salir del programa
+    syscall
+
